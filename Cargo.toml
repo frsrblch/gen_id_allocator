@@ -1,0 +1,19 @@
+[package]
+name = "gen_id_allocator"
+version = "0.1.0"
+authors = ["Fraser Balch <farseer.ulwithy@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+my_derives = { path = "C:/Users/Farseer/IdeaProjects/my_derives" }
+iter_context = { path = "C:/Users/Farseer/IdeaProjects/iter_context" }
+nonmax = "0.5.0"
+fnv = "1.0.7"
+static_assertions = "1.1.0"
+ref-cast = "1.0.6"
+
+[features]
+assert_valid = []
+id_creation = []
