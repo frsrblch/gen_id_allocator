@@ -1,7 +1,7 @@
 use crate::id::UntypedId;
 use crate::Id;
 use fnv::FnvHasher;
-use my_derives::*;
+use force_derive::*;
 use ref_cast::RefCast;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -55,7 +55,7 @@ impl PartialEq<UntypedAllocGen> for UntypedArenaGen {
 }
 
 #[repr(transparent)]
-#[derive(Debug, MyClone, MyDefault, RefCast)]
+#[derive(Debug, ForceClone, ForceDefault, RefCast)]
 pub struct ArenaGen<Arena>(UntypedArenaGen, PhantomData<Arena>);
 
 impl<Arena> ArenaGen<Arena> {

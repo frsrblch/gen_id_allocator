@@ -1,6 +1,6 @@
 use crate::gen::Gen;
 use crate::{Fixed, ValidId};
-use my_derives::*;
+use force_derive::*;
 use ref_cast::RefCast;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
@@ -42,7 +42,7 @@ impl UntypedId {
 }
 
 #[repr(transparent)]
-#[derive(Debug, MyCopy, MyClone, MyEq, MyPartialEq, MyHash, RefCast)]
+#[derive(Debug, ForceCopy, ForceClone, ForceEq, ForcePartialEq, ForceHash, RefCast)]
 pub struct Id<Arena> {
     pub untyped: UntypedId,
     marker: PhantomData<*const Arena>,

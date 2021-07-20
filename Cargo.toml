@@ -7,11 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-my_derives = { path = "C:/Users/Farseer/IdeaProjects/my_derives" }
-iter_context = { path = "C:/Users/Farseer/IdeaProjects/iter_context" }
+force_derive = { git = "https://github.com/frsrblch/force_derive" }
+iter_context = { git = "https://github.com/frsrblch/iter_context" }
 nonmax = "0.5.0"
-fnv = "1.0.7"
-static_assertions = "1.1.0"
+fnv = "1.0"
+static_assertions = "1.1"
 ref-cast = "1.0.6"
 
 [features]
