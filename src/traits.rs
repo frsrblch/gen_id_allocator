@@ -14,7 +14,7 @@ pub trait ValidId: Copy {
         Valid::new(self.id())
     }
 }
-//
+
 // /// This test should fail to compile
 // /// valid2 inherits the lifetime from valid
 // #[test]
