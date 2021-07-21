@@ -5,11 +5,19 @@ use ref_cast::RefCast;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Hash)]
 pub struct UntypedId {
     pub index: u32,
     pub(crate) gen: Gen,
 }
+
+impl PartialEq for UntypedId {
+    fn eq(&self, other: &Self) -> bool {
+        self.index.eq(&other.index) & self.gen.eq(&other.gen)
+    }
+}
+
+impl Eq for UntypedId {}
 
 impl UntypedId {
     #[cfg(feature = "id_creation")]
