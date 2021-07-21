@@ -6,6 +6,7 @@ use crate::UntypedAllocGen;
 use nonmax::NonMaxU32;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
+use force_derive::*;
 
 pub trait Validator<'valid, Arena>: AsRef<AllocGen<Arena>> {
     fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>>;
@@ -97,20 +98,10 @@ impl UntypedAllocator {
 }
 
 #[repr(transparent)]
-#[derive(Debug, RefCast)]
+#[derive(Debug, ForceDefault, RefCast)]
 pub struct Allocator<Arena> {
     untyped: UntypedAllocator,
     arena: PhantomData<Arena>,
-}
-
-impl<Arena> Default for Allocator<Arena> {
-    #[inline]
-    fn default() -> Self {
-        Self {
-            untyped: UntypedAllocator::default(),
-            arena: PhantomData,
-        }
-    }
 }
 
 impl<Arena> Allocator<Arena> {
@@ -157,7 +148,9 @@ impl<Arena> AsRef<AllocGen<Arena>> for Allocator<Arena> {
     }
 }
 
-impl<'valid, Arena> Validator<'valid, Arena> for Allocator<Arena> {
+// Must implement for an Allocator reference so that there is a lifetime
+// for the resulting value to inherit
+impl<'valid, Arena> Validator<'valid, Arena> for &'valid Allocator<Arena> {
     #[inline]
     fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>> {
         if self.is_alive(id) {
@@ -218,29 +211,6 @@ impl<'a, 'valid, Arena> Validator<'valid, Arena> for &'a mut CreateOnly<'valid, 
         self.is_alive(id).then(|| Valid::new(id))
     }
 }
-
-// pub struct Ids<'a, 'valid, Arena> {
-//     iter: std::slice::Iter<'a, Entry>,
-//     valid: PhantomData<&'valid ()>,
-//     arena: PhantomData<*const Arena>,
-// }
-//
-// impl<'a, 'valid: 'a, Arena> Iterator for Ids<'a, 'valid, Arena> {
-//     type Item = Valid<'valid, Id<Arena>>;
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         loop {
-//             let next = self.iter.next()?;
-//             if let Some(id) = next.alive() {
-//                 return Some(Valid::new(Id::new(id)));
-//             }
-//         }
-//     }
-//
-//     fn size_hint(&self) -> (usize, Option<usize>) {
-//         self.iter.size_hint()
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
@@ -329,10 +299,10 @@ mod tests {
         let mut allocator = Allocator::<()>::default();
         let id = allocator.create_id();
 
-        let valid = allocator.validate(id).unwrap();
+        let valid = (&allocator).validate(id).unwrap();
 
-        // uncomment to break compilation
-        let _ = allocator.kill(id);
+        // // uncomment to break compilation
+        // let _ = allocator.kill(id);
 
         dbg!(valid.value);
     }

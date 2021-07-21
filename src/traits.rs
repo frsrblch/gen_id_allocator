@@ -7,30 +7,29 @@ pub trait ValidId: Copy {
     fn id(&self) -> Id<Self::Arena>;
 
     #[inline]
-    fn valid<'v>(&self) -> Valid<'v, Id<Self::Arena>>
+    fn valid<'valid>(&self) -> Valid<'valid, Id<Self::Arena>>
     where
-        Self: 'v,
+        Self: 'valid,
     {
         Valid::new(self.id())
     }
 }
 
-// /// This test should fail to compile
-// /// valid2 inherits the lifetime from valid
-// #[test]
-// fn valid_test() {
-//     use crate::Validator;
-//     let mut alloc = crate::Allocator::<()>::default();
-//     let id = alloc.create().value;
-//
-//     let create_only = alloc.create_only();
-//     let valid = create_only.validate(id).unwrap();
-//     let valid2 = valid.valid();
-//
-//     alloc.kill(id);
-//
-//     dbg!("{:?}", valid2);
-// }
+#[test]
+fn valid_test() {
+    use crate::Validator;
+    let mut alloc = crate::Allocator::<()>::default();
+    let id = alloc.create().value;
+
+    let create_only = alloc.create_only();
+    let valid = create_only.validate(id).unwrap();
+    let valid2 = valid.valid();
+
+    // /// uncomment to break compilation
+    // alloc.kill(id);
+
+    dbg!("{:?}", valid2);
+}
 
 pub trait Fixed {}
 
