@@ -14,6 +14,15 @@ fnv = "1.0"
 static_assertions = "1.1"
 ref-cast = "1.0.6"
 
+[dev-dependencies]
+criterion = "*"
+fnv = "1.0.7"
+ahash = "0.7.4"
+
 [features]
 assert_valid = []
 id_creation = []
+
+[[bench]]
+name = "id_types"
+harness = false
