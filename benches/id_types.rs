@@ -65,8 +65,8 @@ fn packed_id(c: &mut Criterion) {
 
     c.bench_function("packed_id_hash", |b| {
         b.iter(|| {
-            // let mut hasher = fnv::FnvHasher::default();
-            let mut hasher = ahash::AHasher::default();
+            let mut hasher = fnv::FnvHasher::default();
+            // let mut hasher = ahash::AHasher::default();
 
             ids.iter().for_each(|id| id.hash(&mut hasher));
 
@@ -101,8 +101,8 @@ fn split_id(c: &mut Criterion) {
 
     c.bench_function("split_id_hash", |b| {
         b.iter(|| {
-            // let mut hasher = fnv::FnvHasher::default();
-            let mut hasher = ahash::AHasher::default();
+            let mut hasher = fnv::FnvHasher::default();
+            // let mut hasher = ahash::AHasher::default();
 
             ids.iter().for_each(|id| {
                 id.hash(&mut hasher);
