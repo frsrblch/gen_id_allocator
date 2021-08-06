@@ -5,9 +5,9 @@ use ref_cast::RefCast;
 use std::marker::PhantomData;
 
 #[inline]
-fn wrapping_mul_bit_xor(hash: &mut u64, id: UntypedId) {
+fn wrapping_shl_bit_xor(hash: &mut u64, id: UntypedId) {
     let bits = id.bits();
-    *hash = hash.wrapping_mul(bits);
+    *hash <<= 1;
     *hash ^= bits;
 }
 
@@ -22,33 +22,33 @@ impl UntypedArenaGen {
 
     #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
-        wrapping_mul_bit_xor(&mut self.0, id);
+        wrapping_shl_bit_xor(&mut self.0, id);
     }
 }
 
-impl From<&UntypedAllocGen> for u64 {
-    fn from(value: &UntypedAllocGen) -> Self {
-        value.0
-    }
-}
-
-impl<Arena> From<&AllocGen<Arena>> for u64 {
-    fn from(value: &AllocGen<Arena>) -> Self {
-        value.0 .0
-    }
-}
-
-impl From<&UntypedArenaGen> for u64 {
-    fn from(value: &UntypedArenaGen) -> Self {
-        value.0
-    }
-}
-
-impl<Arena> From<&ArenaGen<Arena>> for u64 {
-    fn from(value: &ArenaGen<Arena>) -> Self {
-        value.0 .0
-    }
-}
+// impl From<&UntypedAllocGen> for u64 {
+//     fn from(value: &UntypedAllocGen) -> Self {
+//         value.0
+//     }
+// }
+//
+// impl<Arena> From<&AllocGen<Arena>> for u64 {
+//     fn from(value: &AllocGen<Arena>) -> Self {
+//         value.0 .0
+//     }
+// }
+//
+// impl From<&UntypedArenaGen> for u64 {
+//     fn from(value: &UntypedArenaGen) -> Self {
+//         value.0
+//     }
+// }
+//
+// impl<Arena> From<&ArenaGen<Arena>> for u64 {
+//     fn from(value: &ArenaGen<Arena>) -> Self {
+//         value.0 .0
+//     }
+// }
 
 impl PartialEq<UntypedAllocGen> for UntypedArenaGen {
     #[inline]
@@ -86,7 +86,7 @@ impl UntypedAllocGen {
 
     #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
-        wrapping_mul_bit_xor(&mut self.0, id);
+        wrapping_shl_bit_xor(&mut self.0, id);
     }
 }
 

@@ -85,6 +85,18 @@ fn packed_id(c: &mut Criterion) {
             black_box(hash);
         })
     })
+    .bench_function("packed_id_hash_shl_xor", |b| {
+        b.iter(|| {
+            let mut hash = 7u64;
+
+            ids.iter().for_each(|id| {
+                hash <<= 1;
+                hash ^= id.0.get();
+            });
+
+            black_box(hash);
+        })
+    })
     .bench_function("packed_id_eq", |b| {
         b.iter(|| {
             black_box(ids.iter().zip(&ids).all(|(a, b)| a.eq(b)));
@@ -133,6 +145,22 @@ fn split_id(c: &mut Criterion) {
                 bits |= id.gen.get() as u64;
 
                 hash = hash.wrapping_mul(bits);
+                hash ^= bits;
+            });
+
+            black_box(hash);
+        })
+    })
+    .bench_function("split_id_hash_shl_xor", |b| {
+        b.iter(|| {
+            let mut hash = 7u64;
+
+            ids.iter().for_each(|id| {
+                let mut bits = id.index as u64;
+                bits <<= 32;
+                bits |= id.gen.get() as u64;
+
+                hash <<= 1;
                 hash ^= bits;
             });
 
