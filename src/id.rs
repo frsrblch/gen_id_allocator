@@ -47,6 +47,11 @@ impl UntypedId {
     pub fn increment_gen(&mut self) {
         self.gen = self.gen.next();
     }
+
+    #[inline]
+    pub(crate) fn bits(self) -> u64 {
+        (self.index as u64) << 32 | self.gen.get() as u64
+    }
 }
 
 #[repr(transparent)]

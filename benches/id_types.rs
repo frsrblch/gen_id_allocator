@@ -31,7 +31,7 @@ struct SplitId {
 impl SplitId {
     pub fn new(index: u32) -> Self {
         Self {
-            index: index,
+            index,
             gen: NonZeroU32::new(1).unwrap(),
         }
     }
@@ -73,6 +73,18 @@ fn packed_id(c: &mut Criterion) {
             black_box(hasher.finish());
         })
     })
+    .bench_function("packed_id_hash_mul_xor", |b| {
+        b.iter(|| {
+            let mut hash = 7u64;
+
+            ids.iter().for_each(|id| {
+                hash = hash.wrapping_mul(id.0.get());
+                hash ^= id.0.get();
+            });
+
+            black_box(hash);
+        })
+    })
     .bench_function("packed_id_eq", |b| {
         b.iter(|| {
             black_box(ids.iter().zip(&ids).all(|(a, b)| a.eq(b)));
@@ -109,6 +121,22 @@ fn split_id(c: &mut Criterion) {
             });
 
             black_box(hasher.finish());
+        })
+    })
+    .bench_function("split_id_hash_mul_xor", |b| {
+        b.iter(|| {
+            let mut hash = 7u64;
+
+            ids.iter().for_each(|id| {
+                let mut bits = id.index as u64;
+                bits <<= 32;
+                bits |= id.gen.get() as u64;
+
+                hash = hash.wrapping_mul(bits);
+                hash ^= bits;
+            });
+
+            black_box(hash);
         })
     })
     .bench_function("split_id_eq", |b| {

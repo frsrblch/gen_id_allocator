@@ -1,10 +1,15 @@
 use crate::id::UntypedId;
 use crate::Id;
-use fnv::FnvHasher;
 use force_derive::*;
 use ref_cast::RefCast;
-use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
+
+#[inline]
+fn wrapping_mul_bit_xor(hash: &mut u64, id: UntypedId) {
+    let bits = id.bits();
+    *hash = hash.wrapping_mul(bits);
+    *hash ^= bits;
+}
 
 #[derive(Debug, Clone, Default)]
 pub struct UntypedArenaGen(u64);
@@ -17,9 +22,7 @@ impl UntypedArenaGen {
 
     #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
-        let mut hasher = FnvHasher::with_key(self.0);
-        id.hash(&mut hasher);
-        self.0 = hasher.finish();
+        wrapping_mul_bit_xor(&mut self.0, id);
     }
 }
 
@@ -83,9 +86,7 @@ impl UntypedAllocGen {
 
     #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
-        let mut hasher = FnvHasher::with_key(self.0);
-        id.hash(&mut hasher);
-        self.0 = hasher.finish();
+        wrapping_mul_bit_xor(&mut self.0, id);
     }
 }
 
