@@ -3,11 +3,11 @@ use crate::{Id, Valid};
 pub trait ValidId: Copy {
     /// Type is used instead of a generic parameter so that it can be referenced by `MaybeValidId`
     type Arena;
-    fn index(&self) -> usize;
-    fn id(&self) -> Id<Self::Arena>;
+    fn index(self) -> usize;
+    fn id(self) -> Id<Self::Arena>;
 
     #[inline]
-    fn valid<'valid>(&self) -> Valid<'valid, Id<Self::Arena>>
+    fn valid<'valid>(self) -> Valid<'valid, Id<Self::Arena>>
     where
         Self: 'valid,
     {

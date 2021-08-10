@@ -26,30 +26,6 @@ impl UntypedArenaGen {
     }
 }
 
-// impl From<&UntypedAllocGen> for u64 {
-//     fn from(value: &UntypedAllocGen) -> Self {
-//         value.0
-//     }
-// }
-//
-// impl<Arena> From<&AllocGen<Arena>> for u64 {
-//     fn from(value: &AllocGen<Arena>) -> Self {
-//         value.0 .0
-//     }
-// }
-//
-// impl From<&UntypedArenaGen> for u64 {
-//     fn from(value: &UntypedArenaGen) -> Self {
-//         value.0
-//     }
-// }
-//
-// impl<Arena> From<&ArenaGen<Arena>> for u64 {
-//     fn from(value: &ArenaGen<Arena>) -> Self {
-//         value.0 .0
-//     }
-// }
-
 impl PartialEq<UntypedAllocGen> for UntypedArenaGen {
     #[inline]
     fn eq(&self, other: &UntypedAllocGen) -> bool {

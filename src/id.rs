@@ -115,7 +115,7 @@ impl<Arena> Id<Arena> {
     }
 
     #[inline]
-    pub fn index(&self) -> usize {
+    pub fn index(self) -> usize {
         self.untyped.index()
     }
 
@@ -129,13 +129,13 @@ impl<Arena: Fixed> ValidId for Id<Arena> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index(self) -> usize {
         Id::index(self)
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
-        *self
+    fn id(self) -> Id<Arena> {
+        self
     }
 }
 
@@ -143,13 +143,13 @@ impl<Arena: Fixed> ValidId for &Id<Arena> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
-        Id::index(self)
+    fn index(self) -> usize {
+        Id::index(*self)
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
-        **self
+    fn id(self) -> Id<Arena> {
+        *self
     }
 }
 

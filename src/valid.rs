@@ -87,12 +87,12 @@ impl<'valid, Arena> ValidId for Valid<'valid, Id<Arena>> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index(self) -> usize {
         self.value.index()
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
+    fn id(self) -> Id<Arena> {
         self.value
     }
 }
@@ -101,12 +101,12 @@ impl<'valid, Arena> ValidId for Valid<'valid, &'_ Id<Arena>> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index(self) -> usize {
         self.value.index()
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
+    fn id(self) -> Id<Arena> {
         *self.value
     }
 }
@@ -115,12 +115,12 @@ impl<'valid, Arena> ValidId for &'_ Valid<'valid, Id<Arena>> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index(self) -> usize {
         self.value.index()
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
+    fn id(self) -> Id<Arena> {
         self.value
     }
 }
@@ -129,12 +129,12 @@ impl<'valid, Arena> ValidId for &'_ Valid<'valid, &Id<Arena>> {
     type Arena = Arena;
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index(self) -> usize {
         self.value.index()
     }
 
     #[inline]
-    fn id(&self) -> Id<Arena> {
+    fn id(self) -> Id<Arena> {
         *self.value
     }
 }
