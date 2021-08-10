@@ -164,4 +164,15 @@ mod test {
         assert_eq!(size_of::<UntypedId>(), size_of::<Id<()>>());
         assert_eq!(align_of::<UntypedId>(), align_of::<Id<()>>());
     }
+
+    #[test]
+    fn index_and_gen() {
+        let mut id = Id::<()>::first(0);
+        assert_eq!(0, id.index());
+        assert_eq!(1, id.gen().get());
+
+        id.increment_gen();
+        assert_eq!(0, id.index());
+        assert_eq!(2, id.gen().get());
+    }
 }
