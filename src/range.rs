@@ -22,6 +22,7 @@ impl UntypedIdRange {
         Self { start, end }
     }
 
+    #[inline]
     pub fn range(self) -> Range<usize> {
         Range {
             start: self.start,
@@ -64,7 +65,9 @@ impl<Arena: Fixed> IdRange<Arena> {
     pub fn new(start: usize, end: usize) -> Self {
         Self::from(UntypedIdRange::new(start, end))
     }
+}
 
+impl<Arena> IdRange<Arena> {
     #[inline]
     pub fn range(self) -> UntypedIdRange {
         self.range
