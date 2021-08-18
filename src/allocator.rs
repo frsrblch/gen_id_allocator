@@ -55,8 +55,8 @@ impl UntypedAllocator {
     }
 
     #[inline]
-    pub fn create_range(&mut self, len: u32) -> UntypedIdRange {
-        let start = self.entries.len() as u32;
+    pub fn create_range(&mut self, len: usize) -> UntypedIdRange {
+        let start = self.entries.len();
         let end = start + len;
         for _ in 0..len {
             // guarantees that Ids are contiguous at the end of `self.entries`
@@ -158,7 +158,7 @@ impl<Arena> Allocator<Arena> {
 impl<Arena: Fixed> Allocator<Arena> {
     #[inline]
     pub fn create_range(&mut self, values: &Vec<Arena>) -> IdRange<Arena> {
-        let range = self.untyped.create_range(values.len() as u32);
+        let range = self.untyped.create_range(values.len());
         IdRange::from(range)
     }
 }

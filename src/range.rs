@@ -5,21 +5,28 @@ use std::ops::Range;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct UntypedIdRange {
-    start: u32,
-    end: u32,
+    start: usize,
+    end: usize,
 }
 
 impl UntypedIdRange {
     #[cfg(not(feature = "id_creation"))]
     #[inline]
-    pub(crate) fn new(start: u32, end: u32) -> Self {
+    pub(crate) fn new(start: usize, end: usize) -> Self {
         Self { start, end }
     }
 
     #[cfg(feature = "id_creation")]
     #[inline]
-    pub fn new(start: u32, end: u32) -> Self {
+    pub fn new(start: usize, end: usize) -> Self {
         Self { start, end }
+    }
+
+    pub fn range(self) -> Range<usize> {
+        Range {
+            start: self.start,
+            end: self.end,
+        }
     }
 }
 
@@ -54,7 +61,7 @@ impl<Arena: Fixed> From<UntypedIdRange> for IdRange<Arena> {
 impl<Arena: Fixed> IdRange<Arena> {
     #[cfg(feature = "id_creation")]
     #[inline]
-    pub fn new(start: u32, end: u32) -> Self {
+    pub fn new(start: usize, end: usize) -> Self {
         Self::from(UntypedIdRange::new(start, end))
     }
 }
@@ -74,7 +81,7 @@ impl<Arena> IntoIterator for IdRange<Arena> {
 
 #[derive(Debug, ForceClone)]
 pub struct UntypedIter {
-    range: Range<u32>,
+    range: Range<usize>,
 }
 
 impl Iterator for UntypedIter {
@@ -82,7 +89,7 @@ impl Iterator for UntypedIter {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.range.next().map(UntypedId::first_u32)
+        self.range.next().map(UntypedId::first)
     }
 }
 
