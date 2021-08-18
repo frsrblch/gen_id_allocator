@@ -1,4 +1,4 @@
-use crate::{Id, ValidId};
+use crate::{Id, IdRange, ValidId, ValidRange};
 use iter_context::ContextualIterator;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
@@ -215,5 +215,37 @@ impl<'valid, Iter: Iterator> Iterator for ValidIter<'valid, Iter> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(Valid::new)
+    }
+}
+
+impl<'valid, Arena> ValidRange for Valid<'valid, IdRange<Arena>> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        self.value
+    }
+}
+
+impl<'valid, Arena> ValidRange for Valid<'valid, &IdRange<Arena>> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        *self.value
+    }
+}
+
+impl<'valid, Arena> ValidRange for &Valid<'valid, IdRange<Arena>> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        self.value
+    }
+}
+
+impl<'valid, Arena> ValidRange for &Valid<'valid, &IdRange<Arena>> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        *self.value
     }
 }

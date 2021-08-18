@@ -1,4 +1,4 @@
-use crate::{Id, Valid};
+use crate::{Id, IdRange, Valid};
 
 pub trait ValidId: Copy {
     /// Type is used instead of a generic parameter so that it can be referenced by `MaybeValidId`
@@ -128,4 +128,9 @@ impl<'a, 'valid, Arena> MaybeValidId for &'_ Valid<'valid, &'a Option<Id<Arena>>
     fn try_valid(&self) -> Option<Self::Output> {
         self.value.as_ref().map(Valid::new)
     }
+}
+
+pub trait ValidRange: Copy {
+    type Arena;
+    fn range(self) -> IdRange<Self::Arena>;
 }

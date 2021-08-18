@@ -87,6 +87,22 @@ impl<Arena> IntoIterator for IdRange<Arena> {
     }
 }
 
+impl<Arena: Fixed> ValidRange for IdRange<Arena> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        self
+    }
+}
+
+impl<Arena: Fixed> ValidRange for &IdRange<Arena> {
+    type Arena = Arena;
+    #[inline]
+    fn range(self) -> IdRange<Arena> {
+        *self
+    }
+}
+
 #[derive(Debug, ForceClone)]
 pub struct UntypedIter {
     range: Range<usize>,
