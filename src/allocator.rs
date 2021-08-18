@@ -1,12 +1,13 @@
 use crate::alloc_gen::AllocGen;
 use crate::gen::Gen;
 use crate::id::*;
+use crate::range::{IdRange, UntypedIdRange};
 use crate::valid::Valid;
-use crate::UntypedAllocGen;
+use crate::{Fixed, UntypedAllocGen};
+use force_derive::*;
 use nonmax::NonMaxU32;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
-use force_derive::*;
 
 pub trait Validator<'valid, Arena>: AsRef<AllocGen<Arena>> {
     fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>>;
@@ -53,6 +54,18 @@ impl UntypedAllocator {
         self.reuse_index().unwrap_or_else(|| self.create_new())
     }
 
+    #[inline]
+    pub fn create_range(&mut self, len: u32) -> UntypedIdRange {
+        let start = self.entries.len() as u32;
+        let end = start + len;
+        for _ in 0..len {
+            // guarantees that Ids are contiguous at the end of `self.entries`
+            let _ = self.create_new();
+        }
+        UntypedIdRange::new(start, end)
+    }
+
+    #[inline]
     fn reuse_index(&mut self) -> Option<UntypedId> {
         let index = self.next_dead?.get();
         let entry = self.entries.get_mut(index as usize)?;
@@ -65,6 +78,7 @@ impl UntypedAllocator {
         Some(id)
     }
 
+    #[inline]
     fn create_new(&mut self) -> UntypedId {
         let index = self.entries.len();
         let id = UntypedId::first(index);
@@ -138,6 +152,14 @@ impl<Arena> Allocator<Arena> {
             .filter_map(Entry::alive)
             .map(Id::new)
             .map(Valid::new)
+    }
+}
+
+impl<Arena: Fixed> Allocator<Arena> {
+    #[inline]
+    pub fn create_range(&mut self, values: &Vec<Arena>) -> IdRange<Arena> {
+        let range = self.untyped.create_range(values.len() as u32);
+        IdRange::from(range)
     }
 }
 
@@ -324,5 +346,20 @@ mod tests {
     #[test]
     fn entry_size() {
         assert_eq!(12, std::mem::size_of::<Entry>());
+    }
+
+    #[test]
+    fn create_range() {
+        #[derive(Debug, Copy, Clone)]
+        struct Fixed;
+        crate::fixed_id!(Fixed);
+
+        let mut alloc = Allocator::<Fixed>::default();
+        let rows = vec![Fixed; 3];
+        let range = alloc.create_range(&rows);
+
+        let ids = range.into_iter().collect::<Vec<_>>();
+
+        assert_eq!(vec![Id::first(0), Id::first(1), Id::first(2)], ids);
     }
 }

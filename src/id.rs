@@ -23,18 +23,20 @@ impl UntypedId {
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn first(index: usize) -> Self {
-        UntypedId {
-            index: index as u32,
-            gen: Gen::default(),
-        }
+        UntypedId::first_u32(index as u32)
     }
 
     #[cfg(not(feature = "id_creation"))]
     #[inline]
     pub(crate) fn first(index: usize) -> Self {
+        UntypedId::first_u32(index as u32)
+    }
+
+    #[inline]
+    pub(crate) fn first_u32(index: u32) -> Self {
         UntypedId {
-            index: index as u32,
-            gen: Gen::default(),
+            index,
+            gen: Default::default(),
         }
     }
 
@@ -85,10 +87,7 @@ impl<Arena> Id<Arena> {
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn first(index: usize) -> Self {
-        Self::new(UntypedId {
-            index: index as u32,
-            gen: Gen::default(),
-        })
+        Self::first_u32(index as u32)
     }
 
     #[cfg(not(feature = "id_creation"))]
@@ -98,6 +97,11 @@ impl<Arena> Id<Arena> {
             untyped: id,
             marker: PhantomData,
         }
+    }
+
+    #[inline]
+    pub(crate) fn first_u32(index: u32) -> Self {
+        Self::new(UntypedId::first_u32(index))
     }
 
     #[cfg(feature = "id_creation")]

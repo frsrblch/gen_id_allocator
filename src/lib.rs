@@ -12,5 +12,6 @@ mod alloc_gen;
 mod allocator;
 mod gen;
 mod id;
+mod range;
 mod traits;
 mod valid;
