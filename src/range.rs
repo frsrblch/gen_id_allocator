@@ -64,6 +64,11 @@ impl<Arena: Fixed> IdRange<Arena> {
     pub fn new(start: usize, end: usize) -> Self {
         Self::from(UntypedIdRange::new(start, end))
     }
+
+    #[inline]
+    pub fn range(self) -> UntypedIdRange {
+        self.range
+    }
 }
 
 impl<Arena> IntoIterator for IdRange<Arena> {
