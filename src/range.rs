@@ -29,6 +29,31 @@ impl UntypedIdRange {
             end: self.end,
         }
     }
+
+    #[inline]
+    pub fn extend(&mut self, id: UntypedId) {
+        debug_assert_eq!(id.gen, crate::gen::Gen::default());
+
+        if self.end == id.index as usize {
+            self.end += 1;
+        } else if *self == UntypedIdRange::default() {
+            *self = UntypedIdRange::from(id)
+        } else {
+            panic!("Invalid Id index")
+        }
+    }
+}
+
+impl From<UntypedId> for UntypedIdRange {
+    #[inline]
+    fn from(id: UntypedId) -> Self {
+        debug_assert_eq!(id.gen, crate::gen::Gen::default());
+
+        let start = id.index as usize;
+        let end = start + 1;
+
+        UntypedIdRange { start, end }
+    }
 }
 
 impl IntoIterator for UntypedIdRange {
@@ -59,18 +84,28 @@ impl<Arena: Fixed> From<UntypedIdRange> for IdRange<Arena> {
     }
 }
 
+impl<Arena: Fixed> From<Id<Arena>> for IdRange<Arena> {
+    #[inline]
+    fn from(id: Id<Arena>) -> Self {
+        UntypedIdRange::from(id.untyped).into()
+    }
+}
+
 impl<Arena: Fixed> IdRange<Arena> {
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn new(start: usize, end: usize) -> Self {
         Self::from(UntypedIdRange::new(start, end))
     }
-}
 
-impl<Arena> IdRange<Arena> {
     #[inline]
     pub fn range(self) -> UntypedIdRange {
         self.range
+    }
+
+    #[inline]
+    pub fn extend<V: ValidId<Arena = Arena>>(&mut self, id: V) {
+        self.range.extend(id.id().untyped)
     }
 }
 
