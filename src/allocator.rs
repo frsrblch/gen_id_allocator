@@ -157,8 +157,8 @@ impl<Arena> Allocator<Arena> {
 
 impl<Arena: Fixed> Allocator<Arena> {
     #[inline]
-    pub fn create_range(&mut self, values: &Vec<Arena>) -> IdRange<Arena> {
-        let range = self.untyped.create_range(values.len());
+    pub fn create_range(&mut self, len: usize) -> IdRange<Arena> {
+        let range = self.untyped.create_range(len);
         IdRange::from(range)
     }
 }
@@ -356,7 +356,7 @@ mod tests {
 
         let mut alloc = Allocator::<Fixed>::default();
         let rows = vec![Fixed; 3];
-        let range = alloc.create_range(&rows);
+        let range = alloc.create_range(rows.len());
 
         let ids = range.into_iter().collect::<Vec<_>>();
 
