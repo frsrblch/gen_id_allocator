@@ -33,9 +33,12 @@ impl UntypedIdRange {
     #[inline]
     pub fn extend(&mut self, id: UntypedId) {
         debug_assert_eq!(id.gen, crate::gen::Gen::default());
+        let index = id.index();
 
-        if self.end == id.index as usize {
+        if self.end == index {
             self.end += 1;
+        } else if self.start == index + 1 {
+            self.start -= 1;
         } else if *self == UntypedIdRange::default() {
             *self = UntypedIdRange::from(id)
         } else {
@@ -164,5 +167,46 @@ impl<Arena> Iterator for Iter<Arena> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(Id::new)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[derive(Debug)]
+    struct Fixed;
+    fixed_id!(Fixed);
+
+    #[test]
+    fn extend_default() {
+        let mut range = IdRange::<Fixed>::default();
+        let id = Id::first(3);
+
+        range.extend(id);
+
+        assert_eq!(IdRange::from(id), range);
+    }
+
+    #[test]
+    fn extend_end() {
+        let id2 = Id::first(2);
+        let id3 = Id::first(3);
+        let mut range = IdRange::<Fixed>::from(id2);
+
+        range.extend(id3);
+
+        assert_eq!(IdRange::new(2, 4), range);
+    }
+
+    #[test]
+    fn extend_start() {
+        let id2 = Id::first(2);
+        let id3 = Id::first(3);
+        let mut range = IdRange::<Fixed>::from(id3);
+
+        range.extend(id2);
+
+        assert_eq!(IdRange::new(2, 4), range);
     }
 }
