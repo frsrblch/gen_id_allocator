@@ -45,6 +45,16 @@ impl UntypedIdRange {
             panic!("Invalid Id index")
         }
     }
+
+    #[inline]
+    pub fn position(self, id: UntypedId) -> Option<usize> {
+        let index = id.index();
+        if index < self.end {
+            index.checked_sub(self.start)
+        } else {
+            None
+        }
+    }
 }
 
 impl From<UntypedId> for UntypedIdRange {
@@ -109,6 +119,11 @@ impl<Arena: Fixed> IdRange<Arena> {
     #[inline]
     pub fn extend<V: ValidId<Arena = Arena>>(&mut self, id: V) {
         self.range.extend(id.id().untyped)
+    }
+
+    #[inline]
+    pub fn position(self, id: Id<Arena>) -> Option<usize> {
+        self.range.position(id.untyped)
     }
 }
 
@@ -208,5 +223,15 @@ mod test {
         range.extend(id2);
 
         assert_eq!(IdRange::new(2, 4), range);
+    }
+
+    #[test]
+    fn position() {
+        let range = UntypedIdRange::new(5, 10);
+
+        assert_eq!(None, range.position(UntypedId::first(4)));
+        assert_eq!(Some(0), range.position(UntypedId::first(5)));
+        assert_eq!(Some(4), range.position(UntypedId::first(9)));
+        assert_eq!(None, range.position(UntypedId::first(10)));
     }
 }
