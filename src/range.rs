@@ -23,6 +23,11 @@ impl UntypedIdRange {
     }
 
     #[inline]
+    pub fn len(self) -> usize {
+        self.end - self.start
+    }
+
+    #[inline]
     pub fn range(self) -> Range<usize> {
         Range {
             start: self.start,
@@ -112,6 +117,11 @@ impl<Arena: Fixed> IdRange<Arena> {
     }
 
     #[inline]
+    pub fn len(self) -> usize {
+        self.range.len()
+    }
+
+    #[inline]
     pub fn range(self) -> UntypedIdRange {
         self.range
     }
@@ -192,6 +202,13 @@ mod test {
     #[derive(Debug)]
     struct Fixed;
     fixed_id!(Fixed);
+
+    #[test]
+    fn len() {
+        let range = IdRange::<Fixed>::new(2, 5);
+
+        assert_eq!(3, range.len());
+    }
 
     #[test]
     fn extend_default() {
