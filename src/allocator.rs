@@ -234,6 +234,22 @@ impl<'a, 'valid, Arena> Validator<'valid, Arena> for &'a mut CreateOnly<'valid, 
     }
 }
 
+#[derive(Debug, ForceDefault, ForceClone)]
+pub struct RangeAllocator<Arena> {
+    next: usize,
+    arena: PhantomData<*const Arena>,
+}
+
+impl<Arena: Fixed> RangeAllocator<Arena> {
+    #[inline]
+    pub fn create(&mut self, len: usize) -> IdRange<Arena> {
+        let start = self.next;
+        self.next += len;
+        let end = self.next;
+        IdRange::new(start, end)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -361,5 +377,22 @@ mod tests {
         let ids = range.into_iter().collect::<Vec<_>>();
 
         assert_eq!(vec![Id::first(0), Id::first(1), Id::first(2)], ids);
+    }
+
+    #[test]
+    fn range_allocator_create() {
+        #[derive(Debug, Copy, Clone)]
+        struct Fixed;
+        crate::fixed_id!(Fixed);
+
+        let mut allocator = RangeAllocator::<Fixed>::default();
+
+        let range = allocator.create(3);
+        assert_eq!(0, range.range.start);
+        assert_eq!(3, range.len());
+
+        let range = allocator.create(2);
+        assert_eq!(3, range.range.start);
+        assert_eq!(2, range.len());
     }
 }

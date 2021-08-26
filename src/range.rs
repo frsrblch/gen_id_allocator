@@ -5,8 +5,8 @@ use std::ops::Range;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct UntypedIdRange {
-    start: usize,
-    end: usize,
+    pub(crate) start: usize,
+    pub(crate) end: usize,
 }
 
 impl UntypedIdRange {
@@ -88,7 +88,7 @@ impl IntoIterator for UntypedIdRange {
 
 #[derive(Debug, ForceDefault, ForceCopy, ForceClone, ForceEq, ForcePartialEq, ForceHash)]
 pub struct IdRange<Arena> {
-    range: UntypedIdRange,
+    pub(crate) range: UntypedIdRange,
     arena: PhantomData<*const Arena>,
 }
 
