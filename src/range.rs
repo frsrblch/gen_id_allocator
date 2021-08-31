@@ -110,6 +110,12 @@ impl<Arena: Fixed> From<Id<Arena>> for IdRange<Arena> {
 }
 
 impl<Arena: Fixed> IdRange<Arena> {
+    #[cfg(not(feature = "id_creation"))]
+    #[inline]
+    pub(crate) fn new(start: usize, end: usize) -> Self {
+        Self::from(UntypedIdRange::new(start, end))
+    }
+
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn new(start: usize, end: usize) -> Self {
