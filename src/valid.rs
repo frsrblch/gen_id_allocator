@@ -74,6 +74,10 @@ impl<'valid, T> Valid<'valid, T> {
     {
         Valid::new(T::from(valid.value))
     }
+
+    pub fn map<F: FnOnce(T) -> U, U>(self, f: F) -> Valid<'valid, U> {
+        Valid::new(f(self.value))
+    }
 }
 
 impl<'valid, T: Copy> Valid<'valid, &T> {
