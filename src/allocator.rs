@@ -134,6 +134,16 @@ impl<Arena> Allocator<Arena> {
         self.untyped.kill(id.untyped)
     }
 
+    /// Drains the Vec, kills all the Ids, and filters out any duplicate or invalid Ids
+    /// Returns a Valid<Vec<Id>> for the purpose of notifying other arenas of their deletion
+    #[inline]
+    #[must_use]
+    pub fn kill_vec(&mut self, ids: &mut Vec<Id<Arena>>) -> Valid<Vec<Id<Arena>>> {
+        let vec = ids.drain(..).filter(|id| self.kill(*id)).collect();
+
+        Valid::new(vec)
+    }
+
     #[inline]
     pub fn is_alive(&self, id: Id<Arena>) -> bool {
         self.untyped.is_alive(id.untyped)
@@ -178,6 +188,17 @@ impl<Arena> AsRef<AllocGen<Arena>> for Allocator<Arena> {
 // Must implement for an Allocator reference so that there is a lifetime
 // for the resulting value to inherit
 impl<'valid, Arena> Validator<'valid, Arena> for &'valid Allocator<Arena> {
+    #[inline]
+    fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>> {
+        if self.is_alive(id) {
+            Some(Valid::new(id))
+        } else {
+            None
+        }
+    }
+}
+
+impl<'valid, Arena> Validator<'valid, Arena> for &'valid mut Allocator<Arena> {
     #[inline]
     fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>> {
         if self.is_alive(id) {

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+pub use ref_cast::RefCast;
 pub use static_assertions::assert_impl_one;
 
 pub use alloc_gen::*;
