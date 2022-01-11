@@ -421,4 +421,53 @@ mod tests {
         assert_eq!(3, range.range.start);
         assert_eq!(2, range.len());
     }
+
+    #[test]
+    fn kill_vec_given_live() {
+        #[derive(Debug)]
+        struct Dynamic;
+        crate::dynamic_id!(Dynamic);
+
+        let mut alloc = Allocator::<Dynamic>::default();
+
+        let id = alloc.create().value;
+        let mut ids = vec![id];
+
+        let output = alloc.kill_vec(&mut ids);
+
+        assert_eq!(vec![id], output.value);
+    }
+
+    #[test]
+    fn kill_vec_given_dead_returns_empty() {
+        #[derive(Debug)]
+        struct Dynamic;
+        crate::dynamic_id!(Dynamic);
+
+        let mut alloc = Allocator::<Dynamic>::default();
+
+        let id = alloc.create().value;
+        let mut ids = vec![id];
+        alloc.kill(id);
+
+        let output = alloc.kill_vec(&mut ids);
+
+        assert_eq!(Vec::<Id<Dynamic>>::new(), output.value);
+    }
+
+    #[test]
+    fn kill_vec_given_duplicate_returns_single() {
+        #[derive(Debug)]
+        struct Dynamic;
+        crate::dynamic_id!(Dynamic);
+
+        let mut alloc = Allocator::<Dynamic>::default();
+
+        let id = alloc.create().value;
+        let mut ids = vec![id, id];
+
+        let output = alloc.kill_vec(&mut ids);
+
+        assert_eq!(vec![id], output.value);
+    }
 }
