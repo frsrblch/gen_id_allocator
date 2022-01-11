@@ -145,6 +145,11 @@ impl<Arena> Allocator<Arena> {
     }
 
     #[inline]
+    pub fn validate(&self, id: Id<Arena>) -> Option<Valid<Id<Arena>>> {
+        Validator::validate(&self, id)
+    }
+
+    #[inline]
     pub fn ids<'valid>(&'valid self) -> impl Iterator<Item = Valid<'valid, Id<Arena>>> + 'valid {
         self.untyped
             .entries
