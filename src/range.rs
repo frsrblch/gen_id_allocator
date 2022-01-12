@@ -20,12 +20,20 @@ impl UntypedIdRange {
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn new(start: usize, end: usize) -> Self {
-        Self { start, end }
+        Self {
+            start,
+            end: end.max(start),
+        }
     }
 
     #[inline]
     pub fn len(self) -> usize {
         self.end - self.start
+    }
+
+    #[inline]
+    pub fn is_empty(self) -> bool {
+        self.start == self.end
     }
 
     #[inline]
@@ -126,6 +134,11 @@ impl<Arena: Fixed> IdRange<Arena> {
     #[inline]
     pub fn len(self) -> usize {
         self.range.len()
+    }
+
+    #[inline]
+    pub fn is_empty(self) -> bool {
+        self.range.is_empty()
     }
 
     #[inline]

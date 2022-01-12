@@ -5,6 +5,7 @@ use ref_cast::RefCast;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
 
+#[allow(clippy::derive_hash_xor_eq)]
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Hash)]
 pub struct UntypedId {
     pub index: u32,
@@ -78,6 +79,7 @@ impl<Arena> PartialOrd for Id<Arena> {
 }
 
 impl<Arena> Id<Arena> {
+    #[allow(dead_code)]
     #[cfg(not(feature = "id_creation"))]
     #[inline]
     pub(crate) fn first(index: usize) -> Self {
@@ -99,11 +101,6 @@ impl<Arena> Id<Arena> {
         }
     }
 
-    #[inline]
-    pub(crate) fn first_u32(index: u32) -> Self {
-        Self::new(UntypedId::first_u32(index))
-    }
-
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn new(id: UntypedId) -> Self {
@@ -111,11 +108,6 @@ impl<Arena> Id<Arena> {
             untyped: id,
             marker: PhantomData,
         }
-    }
-
-    #[inline]
-    pub(super) fn increment_gen(&mut self) {
-        self.untyped.increment_gen();
     }
 
     #[inline]
@@ -172,12 +164,12 @@ mod test {
 
     #[test]
     fn index_and_gen() {
-        let mut id = Id::<()>::first(0);
+        let mut id = UntypedId::first(0);
         assert_eq!(0, id.index());
-        assert_eq!(1, id.gen().get());
+        assert_eq!(1, id.gen.get());
 
         id.increment_gen();
         assert_eq!(0, id.index());
-        assert_eq!(2, id.gen().get());
+        assert_eq!(2, id.gen.get());
     }
 }

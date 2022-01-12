@@ -137,7 +137,7 @@ impl<Arena> Allocator<Arena> {
     #[must_use]
     pub fn kill_vec(&mut self, ids: &mut Vec<Id<Arena>>) -> Killed<Arena> {
         // Take gen value before any Ids are killed
-        let gen = self.as_ref().clone();
+        let gen = AllocGen::new(self.untyped.gen.clone());
 
         // Filters out dead Ids and any duplicate values
         let ids = ids.drain(..).filter(|id| self.kill(*id)).collect();
@@ -164,7 +164,7 @@ impl<Arena> Allocator<Arena> {
     }
 
     #[inline]
-    pub fn ids<'valid>(&'valid self) -> impl Iterator<Item = Valid<'valid, Id<Arena>>> + 'valid {
+    pub fn ids<'valid>(&'valid self) -> impl Iterator<Item = Valid<'valid, Id<Arena>>> + '_ {
         self.untyped
             .entries
             .iter()
