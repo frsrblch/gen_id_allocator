@@ -61,6 +61,11 @@ impl UntypedAllocGen {
     }
 
     #[inline]
+    pub(crate) fn clone(&self) -> Self {
+        Self(self.0)
+    }
+
+    #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
         wrapping_shl_bit_xor(&mut self.0, id);
     }
@@ -76,6 +81,11 @@ impl<Arena> AllocGen<Arena> {
     #[inline]
     pub(crate) fn new() -> Self {
         Self(UntypedAllocGen::new(), PhantomData)
+    }
+
+    #[inline]
+    pub(crate) fn clone(&self) -> Self {
+        Self(self.0.clone(), PhantomData)
     }
 
     #[inline]

@@ -135,13 +135,20 @@ impl<Arena> Allocator<Arena> {
     }
 
     /// Drains the Vec, kills all the Ids, and filters out any duplicate or invalid Ids
-    /// Returns a Valid<Vec<Id>> for the purpose of notifying other arenas of their deletion
+    /// Returns a Killed type for the purpose of notifying other arenas of their deletion
     #[inline]
     #[must_use]
-    pub fn kill_vec(&mut self, ids: &mut Vec<Id<Arena>>) -> Valid<Vec<Id<Arena>>> {
-        let vec = ids.drain(..).filter(|id| self.kill(*id)).collect();
+    pub fn kill_vec(&mut self, ids: &mut Vec<Id<Arena>>) -> Killed<Arena> {
+        // Take gen value before any Ids are killed
+        let gen = self.as_ref().clone();
 
-        Valid::new(vec)
+        // Filters out dead Ids and any duplicate values
+        let ids = ids.drain(..).filter(|id| self.kill(*id)).collect();
+
+        Killed {
+            ids: Valid::new(ids),
+            gen,
+        }
     }
 
     #[inline]
@@ -257,6 +264,27 @@ impl<'a, 'valid, Arena> Validator<'valid, Arena> for &'a mut CreateOnly<'valid, 
     #[inline]
     fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>> {
         self.is_alive(id).then(|| Valid::new(id))
+    }
+}
+
+#[derive(Debug)]
+pub struct Killed<'v, Arena> {
+    ids: Valid<'v, Vec<Id<Arena>>>,
+    gen: AllocGen<Arena>,
+}
+
+impl<Arena> AsRef<AllocGen<Arena>> for Killed<'_, Arena> {
+    fn as_ref(&self) -> &AllocGen<Arena> {
+        &self.gen
+    }
+}
+
+impl<'a, 'v, Arena> IntoIterator for &'a Killed<'v, Arena> {
+    type Item = Valid<'v, &'a Id<Arena>>;
+    type IntoIter = crate::valid::ValidIter<'v, std::slice::Iter<'a, Id<Arena>>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&self.ids).into_iter()
     }
 }
 
@@ -433,7 +461,7 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id];
 
-        let output = alloc.kill_vec(&mut ids);
+        let (output, _) = alloc.kill_vec(&mut ids);
 
         assert_eq!(vec![id], output.value);
     }
@@ -450,7 +478,7 @@ mod tests {
         let mut ids = vec![id];
         alloc.kill(id);
 
-        let output = alloc.kill_vec(&mut ids);
+        let (output, _) = alloc.kill_vec(&mut ids);
 
         assert_eq!(Vec::<Id<Dynamic>>::new(), output.value);
     }
@@ -466,8 +494,28 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id, id];
 
-        let output = alloc.kill_vec(&mut ids);
+        let (output, _) = alloc.kill_vec(&mut ids);
 
         assert_eq!(vec![id], output.value);
+    }
+
+    #[test]
+    fn kill_vec_borrow_test() {
+        fn borrow_alloc<'v, V: Validator<'v, Dynamic>>(_: V) {}
+
+        #[derive(Debug)]
+        struct Dynamic;
+        crate::dynamic_id!(Dynamic);
+
+        let mut alloc = Allocator::<Dynamic>::default();
+        let (killed, a2) = alloc.kill_vec(&mut vec![]);
+
+        borrow_alloc(a2);
+
+        // uncomment to break compilation
+        // let id = alloc.create().value;
+        // alloc.kill(id);
+
+        dbg!(killed);
     }
 }
