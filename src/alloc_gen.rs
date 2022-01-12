@@ -5,7 +5,7 @@ use ref_cast::RefCast;
 use std::marker::PhantomData;
 
 #[inline]
-fn wrapping_shl_bit_xor(hash: &mut u64, id: UntypedId) {
+fn wrapping_shl_bit_xor(hash: &mut u64, id: crate::untyped::UntypedId) {
     let bits = id.bits();
     *hash <<= 1;
     *hash ^= bits;
@@ -33,24 +33,6 @@ impl PartialEq<UntypedAllocGen> for UntypedArenaGen {
     }
 }
 
-#[repr(transparent)]
-#[derive(Debug, ForceClone, ForceDefault, RefCast)]
-pub struct ArenaGen<Arena>(UntypedArenaGen, PhantomData<Arena>);
-
-impl<Arena> ArenaGen<Arena> {
-    #[inline]
-    pub fn increment_gen(&mut self, id: Id<Arena>) {
-        self.0.increment_gen(id.untyped);
-    }
-}
-
-impl<Arena> PartialEq<AllocGen<Arena>> for ArenaGen<Arena> {
-    #[inline]
-    fn eq(&self, other: &AllocGen<Arena>) -> bool {
-        self.0.eq(&other.0)
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct UntypedAllocGen(u64);
 
@@ -68,6 +50,24 @@ impl UntypedAllocGen {
     #[inline]
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
         wrapping_shl_bit_xor(&mut self.0, id);
+    }
+}
+
+#[repr(transparent)]
+#[derive(Debug, ForceClone, ForceDefault, RefCast)]
+pub struct ArenaGen<Arena>(UntypedArenaGen, PhantomData<Arena>);
+
+impl<Arena> ArenaGen<Arena> {
+    #[inline]
+    pub fn increment_gen(&mut self, id: Id<Arena>) {
+        self.0.increment_gen(id.untyped);
+    }
+}
+
+impl<Arena> PartialEq<AllocGen<Arena>> for ArenaGen<Arena> {
+    #[inline]
+    fn eq(&self, other: &AllocGen<Arena>) -> bool {
+        self.0.eq(&other.0)
     }
 }
 

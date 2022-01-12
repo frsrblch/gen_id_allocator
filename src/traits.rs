@@ -1,4 +1,9 @@
+use crate::alloc_gen::AllocGen;
 use crate::{Id, IdRange, Valid};
+
+pub trait Validator<'valid, Arena>: AsRef<AllocGen<Arena>> {
+    fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>>;
+}
 
 pub trait ValidId: Copy {
     /// Type is used instead of a generic parameter so that it can be referenced by `MaybeValidId`

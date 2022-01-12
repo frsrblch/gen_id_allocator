@@ -22,6 +22,7 @@ ahash = "0.7.4"
 [features]
 assert_valid = []
 id_creation = []
+untyped = []
 
 [[bench]]
 name = "id_types"

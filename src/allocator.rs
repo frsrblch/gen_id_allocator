@@ -1,17 +1,14 @@
-use crate::alloc_gen::AllocGen;
+use crate::alloc_gen::{AllocGen, UntypedAllocGen};
 use crate::gen::Gen;
+use crate::id::UntypedId;
 use crate::id::*;
 use crate::range::{IdRange, UntypedIdRange};
 use crate::valid::Valid;
-use crate::{Fixed, UntypedAllocGen};
+use crate::{Fixed, Validator};
 use force_derive::*;
 use nonmax::NonMaxU32;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
-
-pub trait Validator<'valid, Arena>: AsRef<AllocGen<Arena>> {
-    fn validate(&self, id: Id<Arena>) -> Option<Valid<'valid, Id<Arena>>>;
-}
 
 #[derive(Debug, Default)]
 pub struct UntypedAllocator {
@@ -461,9 +458,9 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id];
 
-        let (output, _) = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_vec(&mut ids);
 
-        assert_eq!(vec![id], output.value);
+        assert_eq!(vec![id], killed.ids.value);
     }
 
     #[test]
@@ -478,9 +475,9 @@ mod tests {
         let mut ids = vec![id];
         alloc.kill(id);
 
-        let (output, _) = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_vec(&mut ids);
 
-        assert_eq!(Vec::<Id<Dynamic>>::new(), output.value);
+        assert_eq!(Vec::<Id<Dynamic>>::new(), killed.ids.value);
     }
 
     #[test]
@@ -494,13 +491,14 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id, id];
 
-        let (output, _) = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_vec(&mut ids);
 
-        assert_eq!(vec![id], output.value);
+        assert_eq!(vec![id], killed.ids.value);
     }
 
     #[test]
     fn kill_vec_borrow_test() {
+        #[allow(dead_code)]
         fn borrow_alloc<'v, V: Validator<'v, Dynamic>>(_: V) {}
 
         #[derive(Debug)]
@@ -508,9 +506,9 @@ mod tests {
         crate::dynamic_id!(Dynamic);
 
         let mut alloc = Allocator::<Dynamic>::default();
-        let (killed, a2) = alloc.kill_vec(&mut vec![]);
+        let killed = alloc.kill_vec(&mut vec![]);
 
-        borrow_alloc(a2);
+        // borrow_alloc(alloc);
 
         // uncomment to break compilation
         // let id = alloc.create().value;

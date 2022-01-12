@@ -124,6 +124,7 @@ impl<Arena> Id<Arena> {
     }
 
     #[inline]
+    #[cfg(test)]
     pub(crate) fn gen(&self) -> Gen {
         self.untyped.gen
     }

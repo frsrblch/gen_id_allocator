@@ -1,4 +1,5 @@
 use super::*;
+use crate::id::UntypedId;
 use force_derive::*;
 use std::marker::PhantomData;
 use std::ops::Range;
@@ -250,6 +251,8 @@ mod test {
 
     #[test]
     fn position() {
+        use crate::id::UntypedId;
+
         let range = UntypedIdRange::new(5, 10);
 
         assert_eq!(None, range.position(UntypedId::first(4)));
