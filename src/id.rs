@@ -89,7 +89,7 @@ impl<Arena> Id<Arena> {
     #[cfg(feature = "id_creation")]
     #[inline]
     pub fn first(index: usize) -> Self {
-        Self::first_u32(index as u32)
+        Self::new(UntypedId::first_u32(index as u32))
     }
 
     #[cfg(not(feature = "id_creation"))]
