@@ -106,6 +106,11 @@ impl UntypedAllocator {
         let entry = self.entries.get(id.index());
         matches!(entry, Some(Entry::Alive(living)) if *living == id)
     }
+
+    #[inline]
+    pub fn ids(&self) -> impl Iterator<Item = UntypedId> + '_ {
+        self.entries.iter().filter_map(Entry::alive)
+    }
 }
 
 #[repr(transparent)]
