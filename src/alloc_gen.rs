@@ -19,6 +19,12 @@ impl UntypedArenaGen {
     pub(crate) fn increment_gen(&mut self, id: UntypedId) {
         wrapping_shl_bit_xor(&mut self.0, id);
     }
+
+    #[inline]
+    pub(crate) fn update(&mut self, before: &UntypedAllocGen, after: &UntypedAllocGen) {
+        assert_eq!(self, before);
+        self.0 = after.0;
+    }
 }
 
 impl PartialEq<UntypedAllocGen> for UntypedArenaGen {
@@ -51,6 +57,11 @@ impl<Arena> ArenaGen<Arena> {
     #[inline]
     pub fn increment_gen(&mut self, id: Id<Arena>) {
         self.0.increment_gen(id.untyped);
+    }
+
+    #[inline]
+    pub(crate) fn update(&mut self, before: &AllocGen<Arena>, after: &AllocGen<Arena>) {
+        self.0.update(&before.0, &after.0);
     }
 }
 

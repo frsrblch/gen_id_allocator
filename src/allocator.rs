@@ -4,7 +4,7 @@ use crate::id::UntypedId;
 use crate::id::*;
 use crate::range::{IdRange, UntypedIdRange};
 use crate::valid::Valid;
-use crate::{Fixed, Validator};
+use crate::{ArenaGen, Fixed, Validator};
 use force_derive::*;
 use nonmax::NonMaxU32;
 use ref_cast::RefCast;
@@ -140,16 +140,20 @@ impl<Arena> Allocator<Arena> {
     /// Returns a Killed type for the purpose of notifying other arenas of their deletion
     #[inline]
     #[must_use]
-    pub fn kill_vec(&mut self, ids: &mut Vec<Id<Arena>>) -> Killed<Arena> {
+    pub fn kill_multiple(&mut self, ids: &mut Vec<Id<Arena>>) -> Killed<Arena> {
         // Take gen value before any Ids are killed
-        let gen = AllocGen::new(self.untyped.gen.clone());
+        let start = AllocGen::new(self.untyped.gen.clone());
 
         // Filters out dead Ids and any duplicate values
         let ids = ids.drain(..).filter(|id| self.kill(*id)).collect();
 
+        // Take gen value after Ids are killed
+        let end = AllocGen::new(self.untyped.gen.clone());
+
         Killed {
             ids: Valid::new(ids),
-            gen,
+            before: start,
+            after: end,
         }
     }
 
@@ -269,16 +273,13 @@ impl<'a, 'valid, Arena> Validator<'valid, Arena> for &'a mut CreateOnly<'valid, 
     }
 }
 
+/// A list of valid, unique Ids that have been killed.
+/// Includes before and after allocator generations for validating and updating ArenaGen values  
 #[derive(Debug)]
 pub struct Killed<'v, Arena> {
     ids: Valid<'v, Vec<Id<Arena>>>,
-    gen: AllocGen<Arena>,
-}
-
-impl<Arena> AsRef<AllocGen<Arena>> for Killed<'_, Arena> {
-    fn as_ref(&self) -> &AllocGen<Arena> {
-        &self.gen
-    }
+    before: AllocGen<Arena>,
+    after: AllocGen<Arena>,
 }
 
 impl<'a, 'v, Arena> IntoIterator for &'a Killed<'v, Arena> {
@@ -287,6 +288,12 @@ impl<'a, 'v, Arena> IntoIterator for &'a Killed<'v, Arena> {
 
     fn into_iter(self) -> Self::IntoIter {
         (&self.ids).into_iter()
+    }
+}
+
+impl<Arena> Killed<'_, Arena> {
+    pub fn update_gen(&self, gen: &mut ArenaGen<Arena>) {
+        gen.update(&self.before, &self.after);
     }
 }
 
@@ -463,7 +470,7 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id];
 
-        let killed = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_multiple(&mut ids);
 
         assert_eq!(vec![id], killed.ids.value);
     }
@@ -480,7 +487,7 @@ mod tests {
         let mut ids = vec![id];
         alloc.kill(id);
 
-        let killed = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_multiple(&mut ids);
 
         assert_eq!(Vec::<Id<Dynamic>>::new(), killed.ids.value);
     }
@@ -496,7 +503,7 @@ mod tests {
         let id = alloc.create().value;
         let mut ids = vec![id, id];
 
-        let killed = alloc.kill_vec(&mut ids);
+        let killed = alloc.kill_multiple(&mut ids);
 
         assert_eq!(vec![id], killed.ids.value);
     }
@@ -511,7 +518,7 @@ mod tests {
         crate::dynamic_id!(Dynamic);
 
         let mut alloc = Allocator::<Dynamic>::default();
-        let killed = alloc.kill_vec(&mut vec![]);
+        let killed = alloc.kill_multiple(&mut vec![]);
 
         // borrow_alloc(alloc);
 
