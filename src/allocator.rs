@@ -282,18 +282,22 @@ pub struct Killed<'v, Arena> {
     after: AllocGen<Arena>,
 }
 
+impl<'v, Arena> Killed<'v, Arena> {
+    pub fn update_gen(&self, gen: &mut ArenaGen<Arena>) {
+        gen.update(&self.before, &self.after);
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = Valid<'v, &Id<Arena>>> {
+        (&self.ids).into_iter()
+    }
+}
+
 impl<'a, 'v, Arena> IntoIterator for &'a Killed<'v, Arena> {
     type Item = Valid<'v, &'a Id<Arena>>;
     type IntoIter = crate::valid::ValidIter<'v, std::slice::Iter<'a, Id<Arena>>>;
 
     fn into_iter(self) -> Self::IntoIter {
         (&self.ids).into_iter()
-    }
-}
-
-impl<Arena> Killed<'_, Arena> {
-    pub fn update_gen(&self, gen: &mut ArenaGen<Arena>) {
-        gen.update(&self.before, &self.after);
     }
 }
 
