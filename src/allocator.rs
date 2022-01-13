@@ -283,12 +283,20 @@ pub struct Killed<'v, Arena> {
 }
 
 impl<'v, Arena> Killed<'v, Arena> {
-    pub fn update_gen(&self, gen: &mut ArenaGen<Arena>) {
-        gen.update(&self.before, &self.after);
+    pub fn before(&self) -> &AllocGen<Arena> {
+        &self.before
+    }
+
+    pub fn after(&self) -> &AllocGen<Arena> {
+        &self.after
     }
 
     pub fn iter(&self) -> impl Iterator<Item = Valid<'v, &Id<Arena>>> {
         (&self.ids).into_iter()
+    }
+
+    pub fn update_gen(&self, gen: &mut ArenaGen<Arena>) {
+        gen.update(&self.before, &self.after);
     }
 }
 
