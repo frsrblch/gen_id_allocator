@@ -2,7 +2,7 @@ pub use ref_cast::RefCast;
 pub use static_assertions::assert_impl_one;
 
 pub use alloc_gen::{AllocGen, ArenaGen};
-pub use allocator::{Allocator, RangeAllocator};
+pub use allocator::{Allocator, Killed, RangeAllocator};
 pub use id::Id;
 pub use range::IdRange;
 pub use traits::*;
